@@ -3,12 +3,84 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>人参姑娘·职场诚信避坑指南</title>
+    <title>Background Music Toggle</title>
     <script defer src="./assets/script.js"></script>
     <link rel="stylesheet" href="./assets/style.css">
+    <style>
+      #audio-toggle {
+        position: fixed;
+        top: 16px;
+        right: 16px;
+        z-index: 9999;
+        width: 52px;
+        height: 52px;
+        border: 1px solid #1a1a1a;
+        border-radius: 999px;
+        background: rgba(245, 242, 237, 0.92);
+        color: #1a1a1a;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 10px 24px rgba(0, 0, 0, 0.12);
+        cursor: pointer;
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+        padding: 0;
+      }
+
+      #audio-toggle:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 14px 28px rgba(0, 0, 0, 0.14);
+      }
+
+      #audio-toggle:active {
+        transform: translateY(0);
+      }
+
+      #audio-toggle .audio-toggle__icon {
+        display: inline-block;
+        font-size: 24px;
+        line-height: 1;
+        transform-origin: center;
+      }
+
+      #audio-toggle.is-playing .audio-toggle__icon {
+        animation: audio-note-spin 1.2s linear infinite;
+      }
+
+      @keyframes audio-note-spin {
+        from {
+          transform: rotate(0deg);
+        }
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      #creator-credit {
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: 6px;
+        z-index: 9998;
+        text-align: center;
+        font-size: 12px;
+        letter-spacing: 0.2em;
+        color: rgba(26, 26, 26, 0.7);
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.25s ease;
+      }
+
+      #creator-credit.is-visible {
+        opacity: 1;
+      }
+    </style>
   </head>
   <body>
     <div id="root"></div>
+    <div id="creator-credit"></div>
     <audio id="bg-audio" preload="none" loop>
       <source src="./assets/serene-view.mp3" type="audio/mpeg" />
     </audio>
@@ -16,25 +88,40 @@
       id="audio-toggle"
       type="button"
       aria-pressed="false"
-      aria-label="播放背景音乐"
-      style="position:fixed;right:16px;bottom:16px;z-index:9999;padding:10px 14px;border:1px solid #1a1a1a;border-radius:999px;background:rgba(245,242,237,.92);color:#1a1a1a;font:600 14px/1 system-ui,sans-serif;box-shadow:0 10px 24px rgba(0,0,0,.12);cursor:pointer;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)"
+      aria-label="Play background music"
     >
-      播放音乐
+      <span class="audio-toggle__icon" aria-hidden="true">&#9835;</span>
     </button>
     <script>
       (function () {
         const audio = document.getElementById("bg-audio");
         const button = document.getElementById("audio-toggle");
+        const root = document.getElementById("root");
+        const credit = document.getElementById("creator-credit");
 
-        if (!audio || !button) return;
+        if (!audio || !button || !root || !credit) return;
 
         const updateLabel = (playing) => {
-          button.textContent = playing ? "暂停音乐" : "播放音乐";
+          button.classList.toggle("is-playing", playing);
           button.setAttribute("aria-pressed", String(playing));
-          button.setAttribute("aria-label", playing ? "暂停背景音乐" : "播放背景音乐");
+          button.setAttribute("aria-label", playing ? "Pause background music" : "Play background music");
         };
 
+        const updateCredit = () => {
+          const text = root.textContent || "";
+          const visible =
+            text.includes("\u5206\u4eab\u7ed9\u597d\u53cb") ||
+            text.includes("\u91cd\u65b0\u4f53\u9a8c") ||
+            text.includes("\u67e5\u770b\u7ed3\u8bed") ||
+            text.includes("\u4fe1\u8bda\u804c\u573a\u7cfb\u5217") ||
+            text.includes("\u8fbd\u5b81\u975e\u9057\u6587\u5316\u4f20\u64ad");
+          credit.classList.toggle("is-visible", visible);
+        };
+
+        credit.textContent = "\u521b\u4f5c\u4eba\uff1a\u4f55\u946b\u5937";
+
         updateLabel(false);
+        updateCredit();
 
         button.addEventListener("click", async () => {
           if (audio.paused) {
@@ -53,6 +140,11 @@
         audio.addEventListener("ended", () => updateLabel(false));
         audio.addEventListener("pause", () => updateLabel(false));
         audio.addEventListener("play", () => updateLabel(true));
+
+        const observer = new MutationObserver(updateCredit);
+        observer.observe(root, { childList: true, subtree: true, characterData: true });
+
+        setInterval(updateCredit, 500);
       })();
     </script>
   </body>
