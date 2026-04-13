@@ -9,5 +9,51 @@
   </head>
   <body>
     <div id="root"></div>
+    <audio id="bg-audio" preload="none" loop>
+      <source src="./assets/serene-view.mp3" type="audio/mpeg" />
+    </audio>
+    <button
+      id="audio-toggle"
+      type="button"
+      aria-pressed="false"
+      aria-label="播放背景音乐"
+      style="position:fixed;right:16px;bottom:16px;z-index:9999;padding:10px 14px;border:1px solid #1a1a1a;border-radius:999px;background:rgba(245,242,237,.92);color:#1a1a1a;font:600 14px/1 system-ui,sans-serif;box-shadow:0 10px 24px rgba(0,0,0,.12);cursor:pointer;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)"
+    >
+      播放音乐
+    </button>
+    <script>
+      (function () {
+        const audio = document.getElementById("bg-audio");
+        const button = document.getElementById("audio-toggle");
+
+        if (!audio || !button) return;
+
+        const updateLabel = (playing) => {
+          button.textContent = playing ? "暂停音乐" : "播放音乐";
+          button.setAttribute("aria-pressed", String(playing));
+          button.setAttribute("aria-label", playing ? "暂停背景音乐" : "播放背景音乐");
+        };
+
+        updateLabel(false);
+
+        button.addEventListener("click", async () => {
+          if (audio.paused) {
+            try {
+              await audio.play();
+              updateLabel(true);
+            } catch (error) {
+              console.warn("Unable to start audio playback:", error);
+            }
+          } else {
+            audio.pause();
+            updateLabel(false);
+          }
+        });
+
+        audio.addEventListener("ended", () => updateLabel(false));
+        audio.addEventListener("pause", () => updateLabel(false));
+        audio.addEventListener("play", () => updateLabel(true));
+      })();
+    </script>
   </body>
 </html>
